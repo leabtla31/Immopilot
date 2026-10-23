@@ -1,0 +1,321 @@
+// ImmoPilot data model.
+//
+// Conventions
+// - Monetary amounts: Decimal(12, 2), always in EUR.
+// - Rates: Decimal(7, 5) expressed as a fraction (0.0335 = 3,35 %).
+// - Services map Prisma models to plain DTOs (`src/types`) before they reach the UI,
+//   so Decimal never crosses the server/client boundary.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PropertyUsage {
+  PRIMARY_RESIDENCE
+  RENTAL
+  SECONDARY
+}
+
+enum RentalRegime {
+  NONE
+  LMNP_REEL
+  MICRO_BIC
+  NU_REEL
+  MICRO_FONCIER
+}
+
+enum EnergyClass {
+  A
+  B
+  C
+  D
+  E
+  F
+  G
+}
+
+enum ListingStatus {
+  NEW
+  ANALYZED
+  FAVORITE
+  ARCHIVED
+}
+
+enum GoalKind {
+  NET_WORTH
+  PASSIVE_INCOME
+  FINANCIAL_FREEDOM
+}
+
+enum MilestoneKind {
+  RENTAL_PURCHASE
+  PRIMARY_PURCHASE
+  FINANCIAL_FREEDOM
+  OTHER
+}
+
+enum MilestoneStatus {
+  PLANNED
+  IN_PROGRESS
+  DONE
+}
+
+enum ScenarioKind {
+  PRIMARY_FIRST
+  RENTAL_FIRST
+  RENTAL_THEN_PRIMARY
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  firstName String
+  lastName  String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  household     HouseholdMember[]
+  profile       FinancialProfile?
+  assumptions   SimulationAssumptions?
+  properties    Property[]
+  listings      Listing[]
+  goals         Goal[]
+  milestones    Milestone[]
+  scenarios     Scenario[]
+  conversations Conversation[]
+}
+
+/// An earner of the household (borrower or co-borrower). Household income is
+/// the sum of its members' net incomes — never stored twice.
+model HouseholdMember {
+  id               String  @id @default(cuid())
+  userId           String
+  firstName        String
+  netMonthlyIncome Decimal @db.Decimal(12, 2)
+  position         Int     @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Household financial situation, the input of every projection.
+model FinancialProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  birthYear           Int
+  householdSize       Int      @default(1)
+  city                String
+  otherMonthlyIncome  Decimal  @default(0) @db.Decimal(12, 2)
+  monthlyExpenses     Decimal  @db.Decimal(12, 2)
+  currentRent         Decimal  @default(0) @db.Decimal(12, 2)
+  existingMonthlyDebt Decimal  @default(0) @db.Decimal(12, 2)
+  cashSavings         Decimal  @db.Decimal(12, 2)
+  downPayment         Decimal  @db.Decimal(12, 2)
+  financialAssets     Decimal  @default(0) @db.Decimal(12, 2)
+  monthlySavings      Decimal  @db.Decimal(12, 2)
+  marginalTaxRate     Decimal  @default(0.30) @db.Decimal(7, 5)
+  updatedAt           DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Macro assumptions tweakable from the simulator (and the Vision mode).
+model SimulationAssumptions {
+  id                       String   @id @default(cuid())
+  userId                   String   @unique
+  loanRate                 Decimal  @db.Decimal(7, 5)
+  loanDurationYears        Int
+  insuranceRate            Decimal  @db.Decimal(7, 5)
+  notaryFeesRate           Decimal  @db.Decimal(7, 5)
+  maxDebtRatio             Decimal  @db.Decimal(7, 5)
+  inflationRate            Decimal  @db.Decimal(7, 5)
+  salaryGrowthRate         Decimal  @db.Decimal(7, 5)
+  rentalVacancyRate        Decimal  @db.Decimal(7, 5)
+  propertyAppreciationRate Decimal  @db.Decimal(7, 5)
+  rentGrowthRate           Decimal  @db.Decimal(7, 5)
+  savingsYieldRate         Decimal  @db.Decimal(7, 5)
+  updatedAt                DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Neighborhood {
+  id                     String   @id @default(cuid())
+  slug                   String   @unique
+  name                   String
+  city                   String
+  latitude               Float
+  longitude              Float
+  globalScore            Int
+  pricePerSqm            Int
+  priceTrend5y           Decimal  @db.Decimal(7, 5)
+  rentPerSqm             Decimal  @db.Decimal(6, 2)
+  appreciationPotential  Int
+  rentalDemand           Int
+  familyScore            Int
+  studentScore           Int
+  youngProfessionalScore Int
+  lineC                  Boolean  @default(false)
+  metroDistanceMeters    Int
+  metroStation           String
+  aiSummary              String   @db.Text
+  aiStrengths            String[]
+  aiWatchouts            String[]
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  properties Property[]
+  listings   Listing[]
+
+  @@index([city])
+}
+
+/// A property owned by the user (portfolio).
+model Property {
+  id             String        @id @default(cuid())
+  userId         String
+  neighborhoodId String?
+  name           String
+  usage          PropertyUsage
+  rentalRegime   RentalRegime  @default(NONE)
+  purchasePrice  Decimal       @db.Decimal(12, 2)
+  purchaseDate   DateTime
+  notaryFees     Decimal       @db.Decimal(12, 2)
+  worksAmount    Decimal       @default(0) @db.Decimal(12, 2)
+  surface        Decimal       @db.Decimal(7, 2)
+  currentValue   Decimal       @db.Decimal(12, 2)
+  monthlyRent    Decimal       @default(0) @db.Decimal(12, 2)
+  monthlyCharges Decimal       @default(0) @db.Decimal(12, 2)
+  propertyTax    Decimal       @default(0) @db.Decimal(12, 2)
+  energyClass    EnergyClass?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  neighborhood Neighborhood? @relation(fields: [neighborhoodId], references: [id], onDelete: SetNull)
+  loan         Loan?
+
+  @@index([userId])
+}
+
+model Loan {
+  id             String   @id @default(cuid())
+  propertyId     String   @unique
+  principal      Decimal  @db.Decimal(12, 2)
+  annualRate     Decimal  @db.Decimal(7, 5)
+  insuranceRate  Decimal  @default(0) @db.Decimal(7, 5)
+  durationMonths Int
+  startDate      DateTime
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+/// A real-estate listing the user wants analysed.
+model Listing {
+  id              String        @id @default(cuid())
+  userId          String
+  neighborhoodId  String?
+  title           String
+  sourceUrl       String?
+  imageUrl        String?
+  price           Decimal       @db.Decimal(12, 2)
+  surface         Decimal       @db.Decimal(7, 2)
+  rooms           Int
+  floor           Int?
+  energyClass     EnergyClass
+  monthlyCharges  Decimal       @db.Decimal(12, 2)
+  propertyTax     Decimal       @db.Decimal(12, 2)
+  worksEstimate   Decimal       @default(0) @db.Decimal(12, 2)
+  estimatedRent   Decimal       @db.Decimal(12, 2)
+  status          ListingStatus @default(NEW)
+  aiScore         Int?
+  negotiationRate Decimal?      @db.Decimal(7, 5)
+  aiSummary       String?       @db.Text
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  neighborhood Neighborhood? @relation(fields: [neighborhoodId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+}
+
+model Goal {
+  id           String   @id @default(cuid())
+  userId       String
+  kind         GoalKind
+  label        String
+  targetAmount Decimal  @db.Decimal(12, 2)
+  targetYear   Int?
+  position     Int      @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Milestone {
+  id          String          @id @default(cuid())
+  userId      String
+  year        Int
+  title       String
+  description String
+  kind        MilestoneKind
+  status      MilestoneStatus @default(PLANNED)
+  budget      Decimal?        @db.Decimal(12, 2)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, year])
+}
+
+model Scenario {
+  id         String       @id @default(cuid())
+  userId     String
+  kind       ScenarioKind
+  name       String
+  parameters Json
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, kind])
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@index([userId, updatedAt])
+}
+
+model Message {
+  id             String      @id @default(cuid())
+  conversationId String
+  role           MessageRole
+  content        String      @db.Text
+  createdAt      DateTime    @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}

@@ -1,0 +1,159 @@
+/*
+ * ImmoPilot design tokens.
+ *
+ * Raw values live here as CSS custom properties so they can be themed at runtime
+ * (light / dark) and consumed both by Tailwind (`@theme inline` in globals.css)
+ * and by JS (charts read them through `getComputedStyle`).
+ *
+ * Colour model: OKLCH, low chroma everywhere. Accents are used sparingly.
+ */
+
+:root {
+  /* ---------- Surfaces ---------- */
+  --background: oklch(0.982 0.0025 264);
+  --background-subtle: oklch(0.966 0.003 264);
+  --surface: oklch(1 0 0 / 0.72);
+  --surface-strong: oklch(1 0 0 / 0.9);
+  --surface-sunken: oklch(0.955 0.004 264 / 0.7);
+  --overlay: oklch(0.2 0.01 264 / 0.28);
+
+  /* ---------- Content ---------- */
+  --foreground: oklch(0.215 0.011 268);
+  --foreground-secondary: oklch(0.43 0.012 268);
+  --muted-foreground: oklch(0.545 0.012 268);
+  --faint-foreground: oklch(0.68 0.01 268);
+
+  /* ---------- Lines ---------- */
+  --border: oklch(0.215 0.011 268 / 0.075);
+  --border-strong: oklch(0.215 0.011 268 / 0.13);
+  --ring: oklch(0.6 0.11 280 / 0.45);
+  --highlight: oklch(1 0 0 / 0.9);
+
+  /* ---------- Brand & semantic accents (desaturated) ---------- */
+  --primary: oklch(0.235 0.012 268);
+  --primary-foreground: oklch(0.985 0.002 264);
+  --secondary: oklch(0.215 0.011 268 / 0.045);
+  --secondary-foreground: oklch(0.215 0.011 268);
+
+  --violet: oklch(0.585 0.125 287);
+  --violet-soft: oklch(0.585 0.125 287 / 0.1);
+  --blue: oklch(0.62 0.085 250);
+  --blue-soft: oklch(0.62 0.085 250 / 0.1);
+  --green: oklch(0.63 0.095 162);
+  --green-soft: oklch(0.63 0.095 162 / 0.11);
+  --amber: oklch(0.72 0.105 72);
+  --amber-soft: oklch(0.72 0.105 72 / 0.13);
+  --rose: oklch(0.63 0.12 18);
+  --rose-soft: oklch(0.63 0.12 18 / 0.1);
+
+  /* ---------- Data visualisation ---------- */
+  --chart-1: oklch(0.585 0.125 287); /* violet — patrimoine */
+  --chart-2: oklch(0.64 0.085 245); /* bleu — dette */
+  --chart-3: oklch(0.65 0.095 165); /* vert — cash-flow / revenus */
+  --chart-4: oklch(0.74 0.1 72); /* ambre — intérêts */
+  --chart-5: oklch(0.6 0.03 268); /* graphite — référence */
+  --chart-grid: oklch(0.215 0.011 268 / 0.06);
+
+  /* ---------- Ambient background ---------- */
+  --aurora-1: oklch(0.86 0.06 287 / 0.55);
+  --aurora-2: oklch(0.9 0.045 230 / 0.5);
+  --aurora-3: oklch(0.93 0.04 165 / 0.35);
+
+  /* ---------- Elevation: soft, layered, never hard ---------- */
+  --shadow-color: 232 20% 18%;
+  --shadow-xs:
+    0 1px 1px hsl(var(--shadow-color) / 0.03), 0 1px 2px hsl(var(--shadow-color) / 0.035);
+  --shadow-sm:
+    0 1px 1px hsl(var(--shadow-color) / 0.025), 0 2px 4px -1px hsl(var(--shadow-color) / 0.035),
+    0 6px 12px -4px hsl(var(--shadow-color) / 0.04);
+  --shadow-md:
+    0 1px 1px hsl(var(--shadow-color) / 0.02), 0 2px 4px -1px hsl(var(--shadow-color) / 0.03),
+    0 8px 16px -6px hsl(var(--shadow-color) / 0.05),
+    0 20px 36px -12px hsl(var(--shadow-color) / 0.06);
+  --shadow-lg:
+    0 1px 2px hsl(var(--shadow-color) / 0.02), 0 4px 8px -2px hsl(var(--shadow-color) / 0.035),
+    0 16px 32px -10px hsl(var(--shadow-color) / 0.08),
+    0 40px 72px -24px hsl(var(--shadow-color) / 0.1);
+  --shadow-inset: inset 0 1px 0 var(--highlight);
+  --shadow-card: var(--shadow-inset), var(--shadow-sm);
+  --shadow-card-hover: var(--shadow-inset), var(--shadow-md);
+  --shadow-float: var(--shadow-inset), var(--shadow-lg);
+
+  /* ---------- Glass ---------- */
+  --glass-blur: 20px;
+  --glass-saturate: 160%;
+
+  /* ---------- Radius ---------- */
+  --radius: 1rem; /* 16px base */
+
+  /* ---------- Motion ---------- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
+  --duration-slow: 420ms;
+
+  /* ---------- Layout ---------- */
+  --sidebar-width: 264px;
+  --sidebar-width-collapsed: 76px;
+  --topbar-height: 64px;
+  --content-max-width: 1440px;
+}
+
+.dark {
+  --background: oklch(0.155 0.006 268);
+  --background-subtle: oklch(0.18 0.007 268);
+  --surface: oklch(0.215 0.008 268 / 0.55);
+  --surface-strong: oklch(0.225 0.008 268 / 0.88);
+  --surface-sunken: oklch(0.12 0.006 268 / 0.55);
+  --overlay: oklch(0.08 0.005 268 / 0.6);
+
+  --foreground: oklch(0.965 0.003 264);
+  --foreground-secondary: oklch(0.8 0.008 264);
+  --muted-foreground: oklch(0.67 0.01 264);
+  --faint-foreground: oklch(0.52 0.01 264);
+
+  --border: oklch(1 0 0 / 0.07);
+  --border-strong: oklch(1 0 0 / 0.12);
+  --ring: oklch(0.7 0.11 285 / 0.5);
+  --highlight: oklch(1 0 0 / 0.06);
+
+  --primary: oklch(0.965 0.003 264);
+  --primary-foreground: oklch(0.19 0.008 268);
+  --secondary: oklch(1 0 0 / 0.06);
+  --secondary-foreground: oklch(0.965 0.003 264);
+
+  --violet: oklch(0.72 0.12 287);
+  --violet-soft: oklch(0.72 0.12 287 / 0.14);
+  --blue: oklch(0.74 0.08 245);
+  --blue-soft: oklch(0.74 0.08 245 / 0.13);
+  --green: oklch(0.76 0.1 162);
+  --green-soft: oklch(0.76 0.1 162 / 0.13);
+  --amber: oklch(0.8 0.1 75);
+  --amber-soft: oklch(0.8 0.1 75 / 0.13);
+  --rose: oklch(0.72 0.11 18);
+  --rose-soft: oklch(0.72 0.11 18 / 0.13);
+
+  --chart-1: oklch(0.72 0.12 287);
+  --chart-2: oklch(0.74 0.08 240);
+  --chart-3: oklch(0.76 0.1 165);
+  --chart-4: oklch(0.8 0.1 75);
+  --chart-5: oklch(0.6 0.02 264);
+  --chart-grid: oklch(1 0 0 / 0.06);
+
+  --aurora-1: oklch(0.4 0.12 287 / 0.3);
+  --aurora-2: oklch(0.38 0.07 240 / 0.24);
+  --aurora-3: oklch(0.38 0.06 165 / 0.14);
+
+  --shadow-color: 240 30% 2%;
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.3);
+  --shadow-sm:
+    0 1px 2px hsl(var(--shadow-color) / 0.3), 0 6px 12px -4px hsl(var(--shadow-color) / 0.3);
+  --shadow-md:
+    0 1px 2px hsl(var(--shadow-color) / 0.3), 0 8px 16px -6px hsl(var(--shadow-color) / 0.35),
+    0 20px 36px -12px hsl(var(--shadow-color) / 0.4);
+  --shadow-lg:
+    0 2px 4px hsl(var(--shadow-color) / 0.3), 0 16px 32px -10px hsl(var(--shadow-color) / 0.45),
+    0 40px 72px -24px hsl(var(--shadow-color) / 0.55);
+}
