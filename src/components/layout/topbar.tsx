@@ -6,8 +6,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { findNavItem, navigation, utilityPageTitles } from "@/config/navigation";
 import { useUiStore } from "@/store/ui-store-provider";
 import type { UserSummary } from "@/types";
@@ -18,7 +20,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 
 /** Context bar: where am I (section › page), global search, theme and account. */
-export function Topbar({ user }: { user: UserSummary }) {
+export function Topbar({ user, demo = false }: { user: UserSummary; demo?: boolean }) {
   const pathname = usePathname();
   const setCommandOpen = useUiStore((s) => s.setCommandOpen);
   const setMobileNavOpen = useUiStore((s) => s.setMobileNavOpen);
@@ -62,6 +64,14 @@ export function Topbar({ user }: { user: UserSummary }) {
             </li>
           </motion.ol>
         </nav>
+
+        {demo ? (
+          <SimpleTooltip label="Version de démonstration : données fictives, rien n'est enregistré.">
+            <Badge tone="violet" dot tabIndex={0} className="cursor-default">
+              Démo
+            </Badge>
+          </SimpleTooltip>
+        ) : null}
 
         <button
           type="button"

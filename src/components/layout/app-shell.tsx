@@ -14,7 +14,16 @@ import { Topbar } from "./topbar";
  * floating tab bar (mobile) and global command palette.
  * Server Components are passed through `children` untouched.
  */
-export function AppShell({ user, children }: { user: UserSummary; children: React.ReactNode }) {
+export function AppShell({
+  user,
+  demo = false,
+  children,
+}: {
+  user: UserSummary;
+  /** Running on the bundled demo workspace (no database). */
+  demo?: boolean;
+  children: React.ReactNode;
+}) {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
 
   return (
@@ -34,7 +43,7 @@ export function AppShell({ user, children }: { user: UserSummary; children: Reac
             : "lg:pl-[calc(var(--sidebar-width)+0.75rem)]",
         )}
       >
-        <Topbar user={user} />
+        <Topbar user={user} demo={demo} />
         <main
           id="main"
           tabIndex={-1}

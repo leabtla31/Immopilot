@@ -6,6 +6,10 @@ ImmoPilot aide à décider s'il vaut mieux **acheter sa résidence principale**,
 
 ![Dashboard](docs/screenshots/dash-light.png)
 
+## Démo en ligne
+
+**https://leabtla31.github.io/Immopilot/** — version statique navigable, données de démonstration (foyer Léa & Arno), republiée automatiquement à chaque push sur `main` (`.github/workflows/demo.yml`).
+
 ## Démarrage
 
 ```bash
@@ -63,6 +67,7 @@ tests/            Setup Vitest, mocks, e2e Playwright
 - **Flux de données à sens unique** : `page (RSC)` → `features/*/server` → `services` (Prisma → DTO) → `features/*/lib` (pur) → composants. Aucun calcul dans les composants.
 - **Le moteur financier ne connaît ni React ni Next** ; il est testé à 98 % (lignes) et 100 % (fonctions).
 - **Les DTO sont sérialisables** (nombres, chaînes) : les `Decimal` Prisma ne franchissent jamais la frontière serveur/client.
+- **Accès aux données par ports & adapters** (`services/repositories`) : adaptateur Prisma en production, adaptateur démo pour l'export statique (`DATA_SOURCE=demo` / `STATIC_EXPORT=true`). Le code applicatif est identique.
 - **Les chiffres affichés par « l'IA » sont calculés**, jamais générés : le conseiller (sprint 7) racontera les faits produits par `lib/insights`.
 
 ## Moteur financier (`src/lib/finance`)

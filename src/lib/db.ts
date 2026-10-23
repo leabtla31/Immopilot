@@ -7,6 +7,7 @@ import { env } from "@/config/env";
 /**
  * Prisma singleton. In development, Next's HMR re-evaluates modules; caching
  * the client on `globalThis` prevents exhausting the connection pool.
+ * Only imported by the Prisma repository, so demo builds never load it.
  */
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 

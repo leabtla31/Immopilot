@@ -11,6 +11,7 @@ const config = [
   {
     ignores: [
       ".next/**",
+      "out/**",
       "node_modules/**",
       "storybook-static/**",
       "playwright-report/**",

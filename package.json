@@ -30,7 +30,9 @@
     "db:studio": "prisma studio",
     "validate": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
     "postinstall": "prisma generate",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:demo": "STATIC_EXPORT=true next build && touch out/.nojekyll",
+    "preview:demo": "pnpm dlx serve@14 out"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
